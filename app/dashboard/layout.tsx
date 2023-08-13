@@ -9,6 +9,11 @@ type Props = {
   children: ReactNode;
 };
 
+export const metadata = {
+  title: "Dashboard | Ecommerce kicks",
+  description: "Ecommerce application",
+};
+
 const DashboardLayout: FC<Props> = async ({ children }) => {
   const session = await getServerSession(authOptions);
 
