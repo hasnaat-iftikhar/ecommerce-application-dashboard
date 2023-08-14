@@ -10,7 +10,7 @@ import {
 
 const SignIn = () => {
   return (
-    <main className="h-screen flex items-center justify-center">
+    <section className="h-screen flex items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Welcome back!</CardTitle>
@@ -23,7 +23,7 @@ const SignIn = () => {
           <UserAuthForm />
         </CardContent>
       </Card>
-    </main>
+    </section>
   );
 };
 
