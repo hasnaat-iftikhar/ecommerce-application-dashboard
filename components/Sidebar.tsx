@@ -3,8 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { cn } from "@/lib/utils";
+// Components and Libs
 import { buttonVariants } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+
+// Constants
+import ROUTES from "@/constants/routes";
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   className?: string;
@@ -13,23 +17,23 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 const items = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: ROUTES.DASHBOARD,
   },
   {
     title: "Products",
-    href: "/dashboard/products",
+    href: ROUTES.PRODUCTS,
   },
   {
     title: "Orders",
-    href: "/dashboard/orders",
+    href: ROUTES.ORDERS,
   },
   {
     title: "Users",
-    href: "/dashboard/users",
+    href: ROUTES.USERS,
   },
   {
     title: "Settings",
-    href: "/dashboard/settings",
+    href: ROUTES.SETTINGS,
   },
 ];
 

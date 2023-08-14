@@ -13,7 +13,10 @@ const Navabr = async () => {
   return (
     <header className="py-3 border-b border-[#f3f3f3]">
       <Container>
-        <div className="flex justify-end items-center">
+        <div className="flex justify-between items-center">
+          <h1 className="text-white bg-gray-800 text-base font-normal py-2 px-4 rounded-lg cursor-default">
+            Kicks <span className="text-xs">Dashboard</span>
+          </h1>
           {session?.user ? (
             <UserAccountNav user={session.user} />
           ) : (
