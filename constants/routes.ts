@@ -3,7 +3,7 @@ const ROUTES = {
   SIGNIN: "/sign-in",
   DASHBOARD: "/dashboard",
   PRODUCTS: "/dashboard/products",
-  ORDERS: "/dashboard/order",
+  ORDERS: "/dashboard/orders",
   USERS: "/dashboard/users",
   SETTINGS: "/dashboard/settings",
 };
