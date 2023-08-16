@@ -6,6 +6,8 @@ const ROUTES = {
   CREATE_PRODUCT: "/dashboard/products/create",
   EDIT_PRODUCT: (id: string) => `/dashboard/products/${id}`,
   CATEGORIES: "/dashboard/categories",
+  CREATE_CATEGORY: "/dashboard/categories/create",
+  EDIT_CATEGORY: (id: string) => `/dashboard/categories/${id}`,
   BRANDS: "/dashboard/brands",
   TAGS: "/dashboard/tags",
   ORDERS: "/dashboard/orders",
