@@ -49,3 +49,42 @@ model User {
   accounts      Account[]
   sessions      Session[]
 }
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  image       String
+  description String
+  category    Category @relation(fields: [categoryId], references: [id])
+  brand       Brand?   @relation(fields: [brandId], references: [id])
+  price       Int
+  tags        Tag[]
+  categoryId  String
+  brandId     String?
+
+  @@index([categoryId])
+  @@index([brandId])
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String
+
+  products Product[]
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String
+  products Product[]
+
+  @@unique([name])
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String
+  products Product[]
+
+  @@unique([name])
+}

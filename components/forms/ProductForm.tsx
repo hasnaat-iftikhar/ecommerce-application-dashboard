@@ -2,6 +2,8 @@
 
 import React, { FC, ReactNode, useState } from "react";
 import { useParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 // Components
 import { Input } from "@/components/ui/Input";
@@ -17,8 +19,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/Button";
 
-// Libs
+// Libs & Icons
 import { cn } from "@/lib/utils";
+import { ProductFormPayload } from "@/lib/validators/productForm";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 type Props = {
   children: ReactNode;
@@ -53,6 +57,34 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   const handleTagDelete = (st: string) => {
     const filteredTags = tags.filter((t) => t !== st);
     setTags(filteredTags);
+  };
+
+  const { mutate: createProduct, isLoading } = useMutation({
+    mutationFn: async () => {
+      const payload: ProductFormPayload = {
+        name: "Sample product",
+        image:
+          "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/6000080f-9994-4c69-ba0e-1425a1976388/lebron-nxxt-gen-basketball-shoes-55g4w1.png",
+        description: "This is the description of our sample product",
+        category: "Basket ball Shoe",
+        brand: "Nike",
+        price: 200,
+        tags: ["shoe", "nike", "basketball"],
+      };
+
+      const { data } = await axios.post("/api/product", payload);
+      console.log("Data", data);
+
+      return data;
+    },
+  });
+
+  const handleSubmit = () => {
+    if (isEditMode) {
+      console.log("Edit mode submission");
+    } else {
+      createProduct();
+    }
   };
 
   return (
@@ -134,7 +166,8 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
               ))}
           </div>
         </FormGroup>
-        <Button className="w-fit">
+        <Button disabled={isLoading} onClick={handleSubmit} className="w-fit">
+          {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           {isEditMode ? "Update the product" : "Add new product"}
         </Button>
       </FormGroup>

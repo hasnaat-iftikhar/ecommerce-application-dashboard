@@ -24,6 +24,18 @@ const items = [
     href: ROUTES.PRODUCTS,
   },
   {
+    title: "Categories",
+    href: ROUTES.CATEGORIES,
+  },
+  {
+    title: "Brands",
+    href: ROUTES.BRANDS,
+  },
+  {
+    title: "Tags",
+    href: ROUTES.TAGS,
+  },
+  {
     title: "Orders",
     href: ROUTES.ORDERS,
   },
