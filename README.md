@@ -23,6 +23,12 @@ Backend technologies
 ```
 
 ```bash
+Authentication
+--------------
+- Next Auth
+```
+
+```bash
 Deployment
 ----------
 - Vercel
