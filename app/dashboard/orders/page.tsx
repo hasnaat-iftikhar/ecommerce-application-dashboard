@@ -1,9 +1,8 @@
 import React from "react";
+import OrdersTable from "@/components/dashboard/OrdersTable";
 
-type Props = {};
-
-const Orders = (props: Props) => {
-  return <div>Orders</div>;
+const Orders = () => {
+  return <OrdersTable />;
 };
 
 export default Orders;

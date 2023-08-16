@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   children: ReactNode;
@@ -22,7 +23,7 @@ const FormGroup: FC<Props> = ({ children }) => {
   return <div className="w-full flex flex-col gap-2">{children}</div>;
 };
 
-const CreateProductForm = () => {
+const CreateProductForm: FC<{ className?: string }> = ({ className }) => {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +48,7 @@ const CreateProductForm = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className={cn(className, "w-full flex flex-col gap-4")}>
       <FormGroup>
         <Label>Name</Label>
         <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -125,7 +126,7 @@ const CreateProductForm = () => {
               ))}
           </div>
         </FormGroup>
-        <Button>Add new product</Button>
+        <Button className="w-fit">Add new product</Button>
       </FormGroup>
     </div>
   );
