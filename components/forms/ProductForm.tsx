@@ -1,6 +1,9 @@
 "use client";
 
 import React, { FC, ReactNode, useState } from "react";
+import { useParams } from "next/navigation";
+
+// Components
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/Textarea";
@@ -13,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/Button";
+
+// Libs
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -23,15 +28,18 @@ const FormGroup: FC<Props> = ({ children }) => {
   return <div className="w-full flex flex-col gap-2">{children}</div>;
 };
 
-const CreateProductForm: FC<{ className?: string }> = ({ className }) => {
-  const [name, setName] = useState("");
-  const [image, setImage] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
-  const [price, setPrice] = useState(0);
+const ProductForm: FC<{ className?: string }> = ({ className }) => {
+  const { slug } = useParams();
+  const isEditMode = slug !== "create" ? true : false;
+
+  const [name, setName] = useState<string>("");
+  const [image, setImage] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [brand, setBrand] = useState<string>("");
+  const [price, setPrice] = useState<number>(0);
   const [tags, setTags] = useState<string[]>([]);
-  const [tag, setTag] = useState("");
+  const [tag, setTag] = useState<string>("");
 
   const handleTag = () => {
     if (tag === "" || tags.includes(tag)) {
@@ -126,10 +134,12 @@ const CreateProductForm: FC<{ className?: string }> = ({ className }) => {
               ))}
           </div>
         </FormGroup>
-        <Button className="w-fit">Add new product</Button>
+        <Button className="w-fit">
+          {isEditMode ? "Update the product" : "Add new product"}
+        </Button>
       </FormGroup>
     </div>
   );
 };
 
-export default CreateProductForm;
+export default ProductForm;
