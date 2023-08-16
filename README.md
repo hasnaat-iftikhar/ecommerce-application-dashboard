@@ -1,34 +1,62 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Dashboard Design of an E-commerce Application
 
-## Getting Started
+Hello devs,
 
-First, run the development server:
+Welcome to the README for our e-commerce dashboard design. This dashboard is a work in progress and aims to provide a smooth experience for our users. Here's an overview of the tech stack:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+Frontend technologies
+---------------------
+- Typescript
+- Next.js
+- Tailwind CSS
+- ShadCN
+- React query
+- React hook form
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+Backend technologies
+--------------------
+- Prisma (ORM)
+- MySQL DB (Planetscale)
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+Deployment
+----------
+- Vercel
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Environment Variables
 
-## Learn More
+Create a .env file in the frontend root directory and add:
 
-To learn more about Next.js, take a look at the following resources:
+`DATABASE_URL`
+This will be the URL of your Planetscale DB
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`NEXTAUTH_URL`
+Here you need to put base URL of your application
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+`secret`
+Here you need to put same value you will add in `NEXTAUTH_SECRET`
 
-## Deploy on Vercel
+`NEXTAUTH_SECRET`
+Add a secret
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`GOOGLE_CLIENT_ID`
+Here you need to add your Client ID
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+`GOOGLE_CLIENT_SECRET`
+Here you need to add your Client Secret
+
+### Getting Started:
+
+- Clone the repo.
+- Install all dependencies: npm install
+- Set up Planetscale MySQL DB and configure backend .env.
+- Start the application: npm run dev
+
+Feel free to join our development efforts and help us shape the future of our e-commerce dashboard. Together, we'll create an exceptional experience for our users.
+
+Happy coding!
