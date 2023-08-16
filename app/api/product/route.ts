@@ -16,19 +16,19 @@ export async function POST(req: Request) {
     const { name, image, description, category, brand, price, tags } =
       ProductFormValidator.parse(body);
 
-    await prisma.product.create({
-      data: {
-        name,
-        image,
-        description,
-        category,
-        brand,
-        price,
-        tags,
-      },
-    });
+    // await prisma.product.create({
+    //   data: {
+    //     name,
+    //     image,
+    //     description,
+    //     category,
+    //     brand,
+    //     price,
+    //     tags,
+    //   },
+    // });
 
-    return new Response("Product created successfully!");
+    // return new Response("Product created successfully!");
   } catch (err) {
     if (err instanceof z.ZodError)
       return new Response(err.message, {
