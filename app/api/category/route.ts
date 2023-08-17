@@ -1,21 +1,22 @@
+import { z } from "zod";
+
+// Libs
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CategoryFormValidator } from "@/lib/validators/categoryForm";
-import { z } from "zod";
+import { createErrorResponse } from "@/lib/utils";
 
 export async function POST(req: Request) {
-  console.log("h");
   try {
     const session = await getAuthSession();
     if (!session?.user) {
-      return new Response("Unauthorized", {
-        status: 401,
-      });
+      return createErrorResponse(
+        "You are Unauthorized. Please login to your account",
+        401
+      );
     }
 
     const body = await req.json();
-
-    console.log(body, "body");
 
     try {
       const { name } = CategoryFormValidator.parse(body);
@@ -27,8 +28,7 @@ export async function POST(req: Request) {
       });
 
       if (isCategoryExists) {
-        console.log("Category already exists");
-        return new Response("Category already exists", { status: 409 });
+        return createErrorResponse("Category already exists", 409);
       }
 
       await prisma.category.create({
@@ -37,17 +37,20 @@ export async function POST(req: Request) {
         },
       });
 
-      return new Response("Product created successfully!");
+      const successResponse = JSON.stringify({
+        success: true,
+        message: "Category created successfully!",
+      });
+      return new Response(successResponse, {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     } catch (err) {
-      console.log("Err", err);
+      console.log("Error while category creation", err);
+      return createErrorResponse("Category creation failed", 422);
     }
   } catch (err) {
-    console.log(err);
-    if (err instanceof z.ZodError)
-      return new Response(err.message, {
-        status: 422,
-      });
-
-    return new Response("Could not create category", { status: 500 });
+    if (err instanceof z.ZodError) return createErrorResponse(err.message, 500);
+    return createErrorResponse("Server error", 500);
   }
 }

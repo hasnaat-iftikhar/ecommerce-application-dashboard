@@ -1,13 +1,13 @@
 "use client";
 
+import React from "react";
+import { useParams } from "next/navigation";
+
+// Components
 import BackButton from "@/components/BackButton";
 import CategoryForm from "@/components/forms/CategoryForm";
-import { useParams } from "next/navigation";
-import React from "react";
 
-type Props = {};
-
-const Categories = (props: Props) => {
+const Categories = () => {
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
 

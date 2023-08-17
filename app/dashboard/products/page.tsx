@@ -1,10 +1,14 @@
 import React from "react";
+import Link from "next/link";
+
+// Routes
 import ROUTES from "@/constants/routes";
 
 // Components
 import ProductsTable from "@/components/dashboard/ProductsTable";
-import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
+
+// Libs
 import { cn } from "@/lib/utils";
 
 const Products = () => {

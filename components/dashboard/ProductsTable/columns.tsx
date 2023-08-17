@@ -2,7 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
+// Components
 import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
@@ -11,7 +13,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
-import Link from "next/link";
+
+// Routes
 import ROUTES from "@/constants/routes";
 
 export type Payment = {

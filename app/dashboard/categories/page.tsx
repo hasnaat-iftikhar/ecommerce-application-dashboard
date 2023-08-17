@@ -1,9 +1,13 @@
+import React from "react";
+import Link from "next/link";
+
+// Components
 import CategoriesTable from "@/components/dashboard/CategoriesTable";
 import { buttonVariants } from "@/components/ui/Button";
+
+// Routes and Libs
 import ROUTES from "@/constants/routes";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import React from "react";
 
 const Categories = () => {
   return (

@@ -1,11 +1,16 @@
 "use client";
 
+import React, { FC, ReactNode, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
+
+// Libs
+import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { CategoryFormPayload } from "@/lib/validators/categoryForm";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { useParams } from "next/navigation";
-import React, { FC, ReactNode, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+// Components
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { Button } from "../ui/Button";
@@ -20,6 +25,9 @@ const FormGroup: FC<Props> = ({ children }) => {
 };
 
 const CategoryForm: FC<{ className?: string }> = ({ className }) => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
 
@@ -31,16 +39,31 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
         name,
       };
 
-      console.log(payload);
-
       try {
         const { data } = await axios.post("/api/category", payload);
 
-        console.log("Data", data);
+        if (data?.success === true) {
+          toast({
+            variant: "default",
+            title: "Success!",
+            description: data?.message,
+          });
+        }
 
-        return data;
-      } catch (err) {
-        console.log("Error while sending axios request", err);
+        return router.back();
+      } catch (error) {
+        if (
+          axios.isAxiosError(error) &&
+          error?.response?.data?.error === true
+        ) {
+          toast({
+            variant: "destructive",
+            title: "Error!",
+            description: error?.response?.data?.message,
+          });
+        } else {
+          console.log("Error while sending Axios request", error);
+        }
       }
     },
   });
