@@ -54,3 +54,34 @@ export async function POST(req: Request) {
     return createErrorResponse("Server error", 500);
   }
 }
+
+export async function GET() {
+  try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return createErrorResponse(
+        "You are Unauthorized. Please login to your account",
+        401
+      );
+    }
+
+    try {
+      const categories = await prisma.category.findMany();
+
+      const successResponse = JSON.stringify({
+        success: true,
+        message: "Categories fetched successfully!",
+        data: categories,
+      });
+      return new Response(successResponse, {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (err) {
+      console.log("Unable to fetch categories", err);
+      return createErrorResponse("Unable to fetch categories", 422);
+    }
+  } catch (err) {
+    return createErrorResponse("Server error", 500);
+  }
+}

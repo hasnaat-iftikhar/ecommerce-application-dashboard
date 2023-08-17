@@ -83,7 +83,11 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
         <Input value={name} onChange={(e) => setName(e.target.value)} />
       </FormGroup>
 
-      <Button disabled={isLoading} onClick={handleSubmit} className="w-fit">
+      <Button
+        disabled={isLoading || name == ""}
+        onClick={handleSubmit}
+        className="w-fit"
+      >
         {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
         {isEditMode ? "Update the category" : "Add new category"}
       </Button>

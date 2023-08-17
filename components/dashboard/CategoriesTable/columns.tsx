@@ -37,7 +37,6 @@ export const columns: ColumnDef<Payment>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      console.log(JSON.stringify(row, null, 2));
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
