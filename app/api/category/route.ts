@@ -67,22 +67,9 @@ export async function GET() {
     }
 
     try {
-      const allCategories = await prisma.category.findMany();
-
-      const categories = [];
-
-      for (const category of allCategories) {
-        const productsByCategoryIDs = await prisma.category.findUnique({
-          where: {
-            id: category.id,
-          },
-          include: {
-            products: true,
-          },
-        });
-
-        categories.push(productsByCategoryIDs);
-      }
+      const categories = await prisma.category.findMany({
+        include: { products: true },
+      });
 
       const successResponse = JSON.stringify({
         success: true,
