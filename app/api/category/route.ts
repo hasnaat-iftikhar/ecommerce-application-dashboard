@@ -5,6 +5,7 @@ import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CategoryFormValidator } from "@/lib/validators/categoryForm";
 import { createErrorResponse } from "@/lib/utils";
+import axios from "axios";
 
 export async function POST(req: Request) {
   try {
@@ -66,7 +67,22 @@ export async function GET() {
     }
 
     try {
-      const categories = await prisma.category.findMany();
+      const allCategories = await prisma.category.findMany();
+
+      const categories = [];
+
+      for (const category of allCategories) {
+        const productsByCategoryIDs = await prisma.category.findUnique({
+          where: {
+            id: category.id,
+          },
+          include: {
+            products: true,
+          },
+        });
+
+        categories.push(productsByCategoryIDs);
+      }
 
       const successResponse = JSON.stringify({
         success: true,

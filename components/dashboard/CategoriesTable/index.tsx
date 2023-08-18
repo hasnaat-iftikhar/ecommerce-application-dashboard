@@ -1,26 +1,17 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { FC } from "react";
+import Loading from "@/components/Loading";
+import { useQuery } from "@tanstack/react-query";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { FC } from "react";
-import { useQuery } from "@tanstack/react-query";
-import Loading from "@/components/Loading";
+import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/db";
+import axios from "axios";
 
 type Props = {
   className?: string;
 };
-
-// async function getData(): Promise<Payment[]> {
-//   return [
-//     {
-//       id: "1",
-//       no: 1,
-//       name: "Adidas Ultra boost",
-//       attachedProducts: 12,
-//     },
-//   ];
-// }
 
 const CategoriesTable: FC<Props> = ({ className }) => {
   const { isLoading, error, data } = useQuery({
@@ -33,6 +24,10 @@ const CategoriesTable: FC<Props> = ({ className }) => {
   if (error) {
     console.log("Error while fetching categories", error);
     return <p>There is an problem while fetching categories</p>;
+  }
+
+  if (data) {
+    console.log("data", data);
   }
 
   return (

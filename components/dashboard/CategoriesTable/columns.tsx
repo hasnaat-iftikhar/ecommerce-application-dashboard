@@ -18,13 +18,17 @@ export type Payment = {
   id: string;
   no: number;
   name: string;
-  attachedProducts: number;
+  products: string[];
 };
 
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "no",
     header: "No",
+    cell: ({ row }) => {
+      console.log(row);
+      return `#${row?.index + 1}`;
+    },
   },
   {
     accessorKey: "name",
@@ -33,6 +37,10 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "attached-products",
     header: "Attached products",
+    cell: ({ row }) => {
+      const totalProducts = row.original?.products?.length;
+      return totalProducts;
+    },
   },
   {
     id: "actions",
