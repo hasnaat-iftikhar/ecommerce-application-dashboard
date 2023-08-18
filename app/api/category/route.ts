@@ -5,7 +5,6 @@ import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CategoryFormValidator } from "@/lib/validators/categoryForm";
 import { createErrorResponse } from "@/lib/utils";
-import axios from "axios";
 
 export async function POST(req: Request) {
   try {

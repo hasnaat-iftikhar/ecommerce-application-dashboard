@@ -1,13 +1,13 @@
 "use client";
 
 import { FC } from "react";
-import Loading from "@/components/Loading";
+import Message from "@/components/Message";
 import { useQuery } from "@tanstack/react-query";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/db";
-import axios from "axios";
+import { AlertCircle, Loader } from "lucide-react";
 
 type Props = {
   className?: string;
@@ -19,15 +19,23 @@ const CategoriesTable: FC<Props> = ({ className }) => {
     queryFn: () => fetch("/api/category").then((res) => res.json()),
   });
 
-  if (isLoading) return <Loading />;
+  if (isLoading)
+    return (
+      <Message
+        Icon={<Loader />}
+        title="Please wait..."
+        description="We are in a call with the server to fetch categories!"
+      />
+    );
 
   if (error) {
-    console.log("Error while fetching categories", error);
-    return <p>There is an problem while fetching categories</p>;
-  }
-
-  if (data) {
-    console.log("data", data);
+    return (
+      <Message
+        Icon={<AlertCircle />}
+        title="Error :P"
+        description="There is an issue while fetching categories!"
+      />
+    );
   }
 
   return (

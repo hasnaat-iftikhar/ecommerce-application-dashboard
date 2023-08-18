@@ -26,7 +26,6 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: "no",
     header: "No",
     cell: ({ row }) => {
-      console.log(row);
       return `#${row?.index + 1}`;
     },
   },
