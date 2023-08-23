@@ -24,7 +24,7 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="en">
+    <html className="vertical-scroll" lang="en">
       <body className={inter.className}>
         <Providers>
           <main className="flex flex-col h-screen">

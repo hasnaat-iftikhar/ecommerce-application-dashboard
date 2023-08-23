@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 // Libs
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { CategoryFormPayload } from "@/lib/validators/categoryForm";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,8 @@ const FormGroup: FC<Props> = ({ children }) => {
 };
 
 const CategoryForm: FC<{ className?: string }> = ({ className }) => {
+  const queryClient = useQueryClient();
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -43,12 +45,16 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
         const { data } = await axios.post("/api/category", payload);
 
         if (data?.success === true) {
+          setName("");
+
           toast({
             variant: "default",
             title: "Success!",
             description: data?.message,
           });
         }
+
+        await queryClient.refetchQueries(["fetchingCategories"]);
 
         return router.back();
       } catch (error) {

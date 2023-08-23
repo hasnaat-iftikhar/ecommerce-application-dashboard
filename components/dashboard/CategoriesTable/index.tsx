@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/db";
 import { AlertCircle, Loader } from "lucide-react";
 
 type Props = {

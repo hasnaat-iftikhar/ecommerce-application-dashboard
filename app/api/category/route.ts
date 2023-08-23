@@ -87,3 +87,55 @@ export async function GET() {
     return createErrorResponse("Server error", 500);
   }
 }
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const id = await searchParams.get("id");
+
+  if (!id) {
+    return createErrorResponse(
+      "Please provide a valid ID in order to delete a category",
+      400
+    );
+  }
+
+  try {
+    const categoryByID = await prisma.category.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        products: true,
+      },
+    });
+
+    if (
+      !categoryByID ||
+      (categoryByID.products && categoryByID.products.length !== 0)
+    ) {
+      return createErrorResponse("Category has some attached products", 404);
+    }
+
+    await prisma.category.delete({
+      where: {
+        id,
+      },
+    });
+
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Category deleted successfully!",
+    });
+
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.log("[server] Error 404", err);
+    return createErrorResponse(
+      "An error occurred while attempting to delete the category",
+      500
+    );
+  }
+}
