@@ -1,11 +1,11 @@
 "use client";
 
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 // Libs
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { CategoryFormPayload } from "@/lib/validators/categoryForm";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +35,33 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
 
   const [name, setName] = useState<string>("");
 
+  const {
+    isLoading: isCategoryLoading,
+    error,
+    data,
+    refetch,
+  } = useQuery({
+    queryKey: ["fetchingCategoryByID", slug],
+    queryFn: () => fetch(`/api/category?id=${slug}`).then((res) => res.json()),
+    enabled: isEditMode,
+  });
+
+  console.log("Iam fetching data", data);
+
+  useEffect(() => {
+    if (data) {
+      setName(data.data.name);
+    }
+  }, [data]);
+
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error!",
+      description: "We are facing problem while fetching category detail.",
+    });
+  }
+
   const { mutate: createCategory, isLoading } = useMutation({
     mutationFn: async () => {
       const payload: CategoryFormPayload = {
@@ -56,7 +83,7 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
 
         await queryClient.refetchQueries(["fetchingCategories"]);
 
-        return router.back();
+        router.back();
       } catch (error) {
         if (
           axios.isAxiosError(error) &&
@@ -86,7 +113,11 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
     <div className={cn(className, "w-full flex flex-col gap-4")}>
       <FormGroup>
         <Label>Name</Label>
-        <Input value={name} onChange={(e) => setName(e.target.value)} />
+        <Input
+          disabled={isEditMode && isCategoryLoading}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </FormGroup>
 
       <Button

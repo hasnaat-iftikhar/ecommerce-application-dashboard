@@ -55,16 +55,36 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
-  try {
-    const session = await getAuthSession();
-    if (!session?.user) {
-      return createErrorResponse(
-        "You are Unauthorized. Please login to your account",
-        401
-      );
-    }
+export async function GET(req: Request) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return createErrorResponse(
+      "You are Unauthorized. Please login to your account",
+      401
+    );
+  }
 
+  const { searchParams } = new URL(req.url);
+  const id = await searchParams.get("id");
+
+  if (id) {
+    const category = await prisma.category.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Category fetched successfully!",
+      data: category,
+    });
+
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } else {
     try {
       const categories = await prisma.category.findMany({
         include: { products: true },
@@ -83,8 +103,6 @@ export async function GET() {
       console.log("Unable to fetch categories", err);
       return createErrorResponse("Unable to fetch categories", 422);
     }
-  } catch (err) {
-    return createErrorResponse("Server error", 500);
   }
 }
 
