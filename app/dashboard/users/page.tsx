@@ -1,9 +1,10 @@
 import React from "react";
 
-type Props = {};
+// Components
+import UsersTable from "@/components/dashboard/UsersTable";
 
-const Users = (props: Props) => {
-  return <div>Users</div>;
+const Users = () => {
+  return <UsersTable />;
 };
 
 export default Users;

@@ -48,6 +48,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Product {
@@ -60,6 +62,8 @@ model Product {
   price       Int
   categoryId  String
   brandId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([categoryId])
   @@index([brandId])
@@ -70,12 +74,18 @@ model Category {
   name String
 
   products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Brand {
   id       String    @id @default(cuid())
   name     String
   products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([name])
 }

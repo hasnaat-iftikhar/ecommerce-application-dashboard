@@ -12,3 +12,16 @@ export function createErrorResponse(message: string, status: number): Response {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+export function formatISODate(inputDate: string): string {
+  const parsedDate = new Date(inputDate);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  };
+
+  const formattedDate = parsedDate.toLocaleDateString("en-US", options);
+  return formattedDate;
+}
