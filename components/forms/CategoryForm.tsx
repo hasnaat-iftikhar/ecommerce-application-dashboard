@@ -117,6 +117,7 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
           disabled={isEditMode && isCategoryLoading}
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder={isEditMode && isCategoryLoading ? "Please wait..." : ""}
         />
       </FormGroup>
 
