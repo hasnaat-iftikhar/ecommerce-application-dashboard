@@ -58,7 +58,6 @@ model Product {
   category    Category @relation(fields: [categoryId], references: [id])
   brand       Brand?   @relation(fields: [brandId], references: [id])
   price       Int
-  tags        Tag[]
   categoryId  String
   brandId     String?
 
@@ -74,14 +73,6 @@ model Category {
 }
 
 model Brand {
-  id       String    @id @default(cuid())
-  name     String
-  products Product[]
-
-  @@unique([name])
-}
-
-model Tag {
   id       String    @id @default(cuid())
   name     String
   products Product[]

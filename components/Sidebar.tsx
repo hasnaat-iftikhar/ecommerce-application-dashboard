@@ -32,10 +32,6 @@ const items = [
     href: ROUTES.BRANDS,
   },
   {
-    title: "Tags",
-    href: ROUTES.TAGS,
-  },
-  {
     title: "Orders",
     href: ROUTES.ORDERS,
   },
