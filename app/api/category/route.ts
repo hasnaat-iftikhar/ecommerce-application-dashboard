@@ -107,6 +107,14 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return createErrorResponse(
+      "You are Unauthorized. Please login to your account",
+      401
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const id = await searchParams.get("id");
 
@@ -153,6 +161,69 @@ export async function DELETE(req: Request) {
     console.log("[server] Error 404", err);
     return createErrorResponse(
       "An error occurred while attempting to delete the category",
+      500
+    );
+  }
+}
+
+export async function PUT(req: Request) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return createErrorResponse(
+      "You are Unauthorized. Please login to your account",
+      401
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const id = await searchParams.get("id");
+
+  if (!id) {
+    return createErrorResponse(
+      "Please provide a valid ID in order to update a category",
+      400
+    );
+  }
+
+  const body = await req.json();
+
+  try {
+    const { name } = CategoryFormValidator.parse(body);
+
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingCategory) {
+      return createErrorResponse("Category not found", 404);
+    }
+
+    const updatedCategory = await prisma.category.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+      },
+    });
+
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Category updated successfully!",
+      data: updatedCategory,
+    });
+
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) return createErrorResponse(err.message, 400);
+    console.log("[server] Error while updating category", err);
+    return createErrorResponse(
+      "An error occurred while updating the category",
       500
     );
   }

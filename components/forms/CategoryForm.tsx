@@ -101,9 +101,49 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
     },
   });
 
+  const { mutate: updateCategory, isLoading: updateCategoryLoading } =
+    useMutation({
+      mutationFn: async () => {
+        const payload: CategoryFormPayload = {
+          name,
+        };
+
+        try {
+          const { data } = await axios.put(`/api/category?id=${slug}`, payload);
+
+          if (data?.success === true) {
+            setName("");
+
+            toast({
+              variant: "default",
+              title: "Success!",
+              description: data?.message,
+            });
+          }
+
+          await queryClient.refetchQueries(["fetchingCategories"]);
+
+          router.back();
+        } catch (error) {
+          if (
+            axios.isAxiosError(error) &&
+            error?.response?.data?.error === true
+          ) {
+            toast({
+              variant: "destructive",
+              title: "Error!",
+              description: error?.response?.data?.message,
+            });
+          } else {
+            console.log("Error while sending Axios request", error);
+          }
+        }
+      },
+    });
+
   const handleSubmit = () => {
     if (isEditMode) {
-      console.log("Edit mode submission");
+      updateCategory();
     } else {
       createCategory();
     }
@@ -122,11 +162,11 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
       </FormGroup>
 
       <Button
-        disabled={isLoading || name == ""}
+        disabled={updateCategoryLoading || isLoading || name == ""}
         onClick={handleSubmit}
         className="w-fit"
       >
-        {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {(isLoading || updateCategoryLoading) && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
         {isEditMode ? "Update the category" : "Add new category"}
       </Button>
     </div>
