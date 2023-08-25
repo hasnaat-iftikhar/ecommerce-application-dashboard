@@ -53,17 +53,18 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   image       String
   description String
-  category    Category @relation(fields: [categoryId], references: [id])
-  brand       Brand?   @relation(fields: [brandId], references: [id])
+  category    Category         @relation(fields: [categoryId], references: [id])
+  brand       Brand?           @relation(fields: [brandId], references: [id])
+  tags        TagsOnProducts[]
   price       Int
   categoryId  String
   brandId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([categoryId])
   @@index([brandId])
@@ -88,4 +89,26 @@ model Brand {
   updatedAt DateTime @updatedAt
 
   @@unique([name])
+}
+
+model Tag {
+  id       String           @id @default(cuid())
+  name     String
+  products TagsOnProducts[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+}
+
+model TagsOnProducts {
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     String
+
+  @@id([productId, tagId])
+  @@index([tagId])
+  @@index([productId])
 }
