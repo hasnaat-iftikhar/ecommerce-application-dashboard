@@ -1,17 +1,9 @@
 "use client";
 
+import OrderType from "@/lib/types/order";
 import { ColumnDef } from "@tanstack/react-table";
 
-export type Payment = {
-  id: string;
-  product: string;
-  date: string;
-  customer: string;
-  status: "delivered" | "canceled" | "on way";
-  amount: number;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<OrderType>[] = [
   {
     accessorKey: "id",
     header: "Product ID",

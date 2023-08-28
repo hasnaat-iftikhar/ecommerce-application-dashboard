@@ -14,15 +14,11 @@ import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import axios from "axios";
+import BrandType from "@/lib/types/brand";
 
-export type Payment = {
-  id: string;
-  no: number;
-  name: string;
-  products: string[];
-};
-
-export const BrandActionsCell: React.FC<{ row: Row<Payment> }> = ({ row }) => {
+export const BrandActionsCell: React.FC<{ row: Row<BrandType> }> = ({
+  row,
+}) => {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation(
@@ -80,7 +76,7 @@ export const BrandActionsCell: React.FC<{ row: Row<Payment> }> = ({ row }) => {
   );
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<BrandType>[] = [
   {
     accessorKey: "no",
     header: "No",

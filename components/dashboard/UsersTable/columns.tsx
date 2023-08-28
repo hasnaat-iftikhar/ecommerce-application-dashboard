@@ -1,15 +1,8 @@
+import UserType from "@/lib/types/user";
 import { formatISODate } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 
-export type Payment = {
-  id: string;
-  no: number;
-  name: string;
-  email: string;
-  createdAt: string;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<UserType>[] = [
   {
     accessorKey: "no",
     header: "No",

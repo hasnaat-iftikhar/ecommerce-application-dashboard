@@ -1,13 +1,14 @@
 import { cn } from "@/lib/utils";
-import { Payment, columns } from "./columns";
+import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { FC } from "react";
+import OrderType from "@/lib/types/order";
 
 type Props = {
   className?: string;
 };
 
-async function getData(): Promise<Payment[]> {
+async function getData(): Promise<OrderType[]> {
   return [
     {
       id: "#1",

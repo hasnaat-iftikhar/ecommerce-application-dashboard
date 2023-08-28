@@ -2,7 +2,7 @@
 
 import React, { FC, ReactNode, useState } from "react";
 import { useParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 // Components
@@ -22,7 +22,9 @@ import { Button } from "@/components/ui/Button";
 // Libs & Icons
 import { cn } from "@/lib/utils";
 import { ProductFormPayload } from "@/lib/validators/productForm";
+import TagType from "@/lib/types/tag";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import MultiSelector from "../MultiSelector";
 
 type Props = {
   children: ReactNode;
@@ -36,26 +38,52 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
 
+  const {
+    isLoading: areCategoriesLoading,
+    error: categoriesError,
+    data: allCategories,
+  } = useQuery({
+    queryKey: ["fetchingCategories"],
+    queryFn: () => fetch("/api/category").then((res) => res.json()),
+  });
+
+  const {
+    isLoading: areBrandsLoading,
+    error: brandsError,
+    data: allBrands,
+  } = useQuery({
+    queryKey: ["fetchingBrands"],
+    queryFn: () => fetch("/api/brand").then((res) => res.json()),
+  });
+
+  const {
+    isLoading: areTagsLoading,
+    error: tagsError,
+    data: allTags,
+  } = useQuery({
+    queryKey: ["fetchingTags"],
+    queryFn: () => fetch("/api/tag").then((res) => res.json()),
+  });
+
   const [name, setName] = useState<string>("");
   const [image, setImage] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [brand, setBrand] = useState<string>("");
   const [price, setPrice] = useState<number>(0);
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
   const [tag, setTag] = useState<string>("");
 
-  const handleTag = () => {
-    if (tag === "" || tags.includes(tag)) {
+  const handleTag = (selectedTag: TagType) => {
+    if (tags.some((t) => t.id === selectedTag.id)) {
       return;
     } else {
-      setTags([...tags, tag.toLowerCase()]);
-      setTag("");
+      setTags([...tags, selectedTag]);
     }
   };
 
-  const handleTagDelete = (st: string) => {
-    const filteredTags = tags.filter((t) => t !== st);
+  const handleTagDelete = (selectedTag: TagType) => {
+    const filteredTags = tags.filter((item) => item.id !== selectedTag.id);
     setTags(filteredTags);
   };
 
@@ -115,9 +143,19 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="value-1">Value 1</SelectItem>
-            <SelectItem value="value-2">Value 2</SelectItem>
-            <SelectItem value="value-3">Value 3</SelectItem>
+            {areCategoriesLoading ? (
+              <SelectItem value="">Please wait...</SelectItem>
+            ) : categoriesError ? (
+              <SelectItem value="">Unable to fetch categories!</SelectItem>
+            ) : allCategories?.data.length > 0 ? (
+              allCategories.data?.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="">No category found.</SelectItem>
+            )}
           </SelectContent>
         </Select>
       </FormGroup>
@@ -128,49 +166,63 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
             <SelectValue placeholder="Select brand" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="value-1">Value 1</SelectItem>
-            <SelectItem value="value-2">Value 2</SelectItem>
-            <SelectItem value="value-3">Value 3</SelectItem>
+            {areBrandsLoading ? (
+              <SelectItem value="">Please wait...</SelectItem>
+            ) : brandsError ? (
+              <SelectItem value="">Unable to fetch brands!</SelectItem>
+            ) : allBrands?.data.length > 0 ? (
+              allBrands.data?.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="">No brand found.</SelectItem>
+            )}
           </SelectContent>
         </Select>
-        <FormGroup>
-          <Label>Price</Label>
-          <div className="relative">
-            <p className="absolute top-[50%] left-4 translate-y-[-50%]">$</p>
-            <Input
-              className="pl-10"
-              value={price || ""}
-              onChange={(e) => setPrice(parseInt(e.target.value))}
-            />
-          </div>
-        </FormGroup>
-        <FormGroup>
-          <Label>Tags</Label>
-          <div className="flex items-center gap-2">
-            <Input value={tag} onChange={(e) => setTag(e.target.value)} />
-            <Button className="flex gap-2" onClick={handleTag}>
-              Add
-            </Button>
-          </div>
+      </FormGroup>
+      <FormGroup>
+        <Label>Price</Label>
+        <div className="relative">
+          <p className="absolute top-[50%] left-4 translate-y-[-50%]">$</p>
+          <Input
+            className="pl-10"
+            value={price || ""}
+            onChange={(e) => setPrice(parseInt(e.target.value))}
+          />
+        </div>
+      </FormGroup>
+      <FormGroup>
+        <Label>Tags</Label>
+        <Select>
+          <MultiSelector
+            label="Select tags"
+            items={allTags?.data}
+            isError={tagsError}
+            isLoading={areTagsLoading}
+            handleTag={async (item) => handleTag(item)}
+            selectedItems={tags}
+          />
           <div className="flex flex-wrap gap-1">
             {tags.length > 0 &&
-              tags?.map((t, i) => (
+              tags?.map((item: TagType) => (
                 <Badge
-                  onClick={() => handleTagDelete(t)}
-                  key={i}
+                  onClick={() => handleTagDelete(item)}
+                  key={item.id}
                   className="cursor-pointer"
                   variant="outline"
                 >
-                  {t}
+                  {item.name}
                 </Badge>
               ))}
           </div>
-        </FormGroup>
-        <Button disabled={isLoading} onClick={handleSubmit} className="w-fit">
-          {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditMode ? "Update the product" : "Add new product"}
-        </Button>
+        </Select>
       </FormGroup>
+      <Button disabled={isLoading} onClick={handleSubmit} className="w-fit">
+        {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {isEditMode ? "Update the product" : "Add new product"}
+      </Button>
     </div>
   );
 };

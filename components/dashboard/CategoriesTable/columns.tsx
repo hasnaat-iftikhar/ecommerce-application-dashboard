@@ -14,15 +14,9 @@ import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import axios from "axios";
+import CategoryType from "@/lib/types/category";
 
-export type Payment = {
-  id: string;
-  no: number;
-  name: string;
-  products: string[];
-};
-
-export const CategoryActionsCell: React.FC<{ row: Row<Payment> }> = ({
+export const CategoryActionsCell: React.FC<{ row: Row<CategoryType> }> = ({
   row,
 }) => {
   const queryClient = useQueryClient();
@@ -82,7 +76,7 @@ export const CategoryActionsCell: React.FC<{ row: Row<Payment> }> = ({
   );
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<CategoryType>[] = [
   {
     accessorKey: "no",
     header: "No",

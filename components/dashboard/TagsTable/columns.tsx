@@ -14,15 +14,9 @@ import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import axios from "axios";
+import TagType from "@/lib/types/tag";
 
-export type Payment = {
-  id: string;
-  no: number;
-  name: string;
-  products: string[];
-};
-
-export const TagActionsCell: React.FC<{ row: Row<Payment> }> = ({ row }) => {
+export const TagActionsCell: React.FC<{ row: Row<TagType> }> = ({ row }) => {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation(
@@ -80,7 +74,7 @@ export const TagActionsCell: React.FC<{ row: Row<Payment> }> = ({ row }) => {
   );
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<TagType>[] = [
   {
     accessorKey: "no",
     header: "No",

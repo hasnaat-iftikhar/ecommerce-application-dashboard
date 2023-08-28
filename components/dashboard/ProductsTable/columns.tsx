@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
+// Type
+import ProductType from "@/lib/types/product";
+
 // Components
 import { Button } from "@/components/ui/Button";
 import {
@@ -17,15 +20,7 @@ import {
 // Routes
 import ROUTES from "@/constants/routes";
 
-export type Payment = {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  sales: number;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<ProductType>[] = [
   {
     accessorKey: "id",
     header: "Product ID",
