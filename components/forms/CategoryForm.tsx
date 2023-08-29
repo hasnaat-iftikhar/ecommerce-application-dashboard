@@ -46,8 +46,6 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
     enabled: isEditMode,
   });
 
-  console.log("Iam fetching data", data);
-
   useEffect(() => {
     if (data) {
       setName(data.data.name);
@@ -166,7 +164,9 @@ const CategoryForm: FC<{ className?: string }> = ({ className }) => {
         onClick={handleSubmit}
         className="w-fit"
       >
-        {(isLoading || updateCategoryLoading) && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {(isLoading || updateCategoryLoading) && (
+          <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+        )}
         {isEditMode ? "Update the category" : "Add new category"}
       </Button>
     </div>

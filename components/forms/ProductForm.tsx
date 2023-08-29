@@ -1,7 +1,7 @@
 "use client";
 
-import React, { FC, ReactNode, useState } from "react";
-import { useParams } from "next/navigation";
+import React, { ChangeEvent, FC, ReactNode, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -25,6 +25,8 @@ import { ProductFormPayload } from "@/lib/validators/productForm";
 import TagType from "@/lib/types/tag";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import MultiSelector from "../MultiSelector";
+import Image from "next/image";
+import { toast } from "@/hooks/use-toast";
 
 type Props = {
   children: ReactNode;
@@ -35,6 +37,7 @@ const FormGroup: FC<Props> = ({ children }) => {
 };
 
 const ProductForm: FC<{ className?: string }> = ({ className }) => {
+  const router = useRouter();
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
 
@@ -66,44 +69,89 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   });
 
   const [name, setName] = useState<string>("");
-  const [image, setImage] = useState<string>("");
+  const [image, setImage] = useState<string | ArrayBuffer | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [brand, setBrand] = useState<string>("");
   const [price, setPrice] = useState<number>(0);
   const [tags, setTags] = useState<TagType[]>([]);
-  const [tag, setTag] = useState<string>("");
+  const [tagIDs, setTagIDs] = useState<string[]>([]);
 
   const handleTag = (selectedTag: TagType) => {
     if (tags.some((t) => t.id === selectedTag.id)) {
       return;
     } else {
       setTags([...tags, selectedTag]);
+      setTagIDs([...tagIDs, selectedTag.id]);
     }
   };
 
   const handleTagDelete = (selectedTag: TagType) => {
     const filteredTags = tags.filter((item) => item.id !== selectedTag.id);
     setTags(filteredTags);
+
+    const filteredTagIDs = tagIDs.filter((id) => id !== selectedTag.id);
+    setTagIDs(filteredTagIDs);
+  };
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && file.type.startsWith("image/")) {
+      setSelectedFile(file);
+
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const result = e.target?.result;
+        if (result) {
+          setImage(result);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
 
   const { mutate: createProduct, isLoading } = useMutation({
     mutationFn: async () => {
-      const payload: ProductFormPayload = {
-        name: "Sample product",
-        image:
-          "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/6000080f-9994-4c69-ba0e-1425a1976388/lebron-nxxt-gen-basketball-shoes-55g4w1.png",
-        description: "This is the description of our sample product",
-        category: "Basket ball Shoe",
-        brand: "Nike",
-        price: 200,
-        tags: ["shoe", "nike", "basketball"],
+      const payload: any = {
+        name,
+        image: image as string | null,
+        description,
+        category,
+        brand,
+        price,
+        tags: tagIDs,
       };
 
-      const { data } = await axios.post("/api/product", payload);
-      console.log("Data", data);
+      try {
+        const { data } = await axios.post("/api/product", payload);
 
-      return data;
+        if (data?.success === true) {
+          toast({
+            variant: "default",
+            title: "Success!",
+            description: data?.message,
+          });
+        }
+
+        router.back();
+      } catch (error) {
+        if (
+          axios.isAxiosError(error) &&
+          error?.response?.data?.error === true
+        ) {
+          toast({
+            variant: "destructive",
+            title: "Error!",
+            description: error?.response?.data?.message,
+          });
+        } else {
+          console.log("Error while sending Axios request", error);
+        }
+      }
     },
   });
 
@@ -123,11 +171,15 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
       </FormGroup>
       <FormGroup>
         <Label>Image</Label>
-        <Input
-          type="file"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-        />
+        <Input accept="image/*" type="file" onChange={handleImageChange} />
+        {image && (
+          <Image
+            width={200}
+            height={200}
+            src={image.toString()}
+            alt="Selected"
+          />
+        )}
       </FormGroup>
       <FormGroup>
         <Label>Description</Label>

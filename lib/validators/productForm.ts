@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const ProductFormValidator = z.object({
-  name: z.string().min(5).max(20),
-  image: z.string(),
+  name: z.string(),
+  image: z.string().nullable(),
   description: z.string().max(1000),
   category: z.string(),
   brand: z.string(),
