@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -21,19 +21,24 @@ import { Button } from "@/components/ui/Button";
 
 // Libs & Icons
 import { cn } from "@/lib/utils";
-import { ProductFormPayload } from "@/lib/validators/productForm";
 import TagType from "@/lib/types/tag";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import MultiSelector from "../MultiSelector";
 import Image from "next/image";
 import { toast } from "@/hooks/use-toast";
+import { UploadButton } from "@/lib/uploadthing";
 
 type Props = {
   children: ReactNode;
+  className?: string;
 };
 
-const FormGroup: FC<Props> = ({ children }) => {
-  return <div className="w-full flex flex-col gap-2">{children}</div>;
+const FormGroup: FC<Props> = ({ className = "", children }) => {
+  return (
+    <div className={cn(className, "w-full flex flex-col gap-2")}>
+      {children}
+    </div>
+  );
 };
 
 const ProductForm: FC<{ className?: string }> = ({ className }) => {
@@ -69,8 +74,8 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   });
 
   const [name, setName] = useState<string>("");
-  const [image, setImage] = useState<string | ArrayBuffer | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | undefined>();
+  const [image, setImage] = useState<string>("");
+  const [imageUploading, setImageUploading] = useState<boolean>(false);
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [brand, setBrand] = useState<string>("");
@@ -95,25 +100,6 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
     setTagIDs(filteredTagIDs);
   };
 
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (file && file.type.startsWith("image/")) {
-      setSelectedFile(file);
-
-      const reader = new FileReader();
-
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const result = e.target?.result;
-        if (result) {
-          setImage(result);
-        }
-      };
-
-      reader.readAsDataURL(file);
-    }
-  };
-
   const { mutate: createProduct, isLoading } = useMutation({
     mutationFn: async () => {
       const payload: any = {
@@ -127,9 +113,22 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
       };
 
       try {
-        const { data } = await axios.post("/api/product", payload);
+        const { data } = await axios.post(
+          "/api/product",
+          JSON.stringify(payload)
+        );
 
         if (data?.success === true) {
+          setName("");
+          setImage("");
+          setImageUploading(false);
+          setDescription("");
+          setCategory("");
+          setBrand("");
+          setPrice(0);
+          setTags([]);
+          setTagIDs([]);
+
           toast({
             variant: "default",
             title: "Success!",
@@ -171,12 +170,39 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
       </FormGroup>
       <FormGroup>
         <Label>Image</Label>
-        <Input accept="image/*" type="file" onChange={handleImageChange} />
+        <div className="relative" id="imageUploader">
+          {imageUploading && (
+            <div className="bg-black opacity-10 rounded-[6px] absolute top-0 left-0 right-0 bottom-0 z-[2]" />
+          )}
+          <UploadButton
+            className="opacity-0 absolute top-0 left-0 right-0 bottom-0"
+            endpoint="imageUploader"
+            onClientUploadComplete={(res: any) => {
+              setImageUploading(false);
+              if (res[0].fileUrl) {
+                console.log(res[0].fileUrl);
+                setImage(res[0].fileUrl);
+              }
+            }}
+            onUploadBegin={() => {
+              setImageUploading(true);
+            }}
+            onUploadError={(error: Error) => {
+              alert(`ERROR! ${error.message}`);
+            }}
+          />
+          <Input
+            readOnly={true}
+            value={image ? image : "Please select an image"}
+          />
+        </div>
+        {imageUploading && <Label>Please wait...</Label>}
         {image && (
           <Image
+            className="object-contain"
             width={200}
             height={200}
-            src={image.toString()}
+            src={`${image}`}
             alt="Selected"
           />
         )}

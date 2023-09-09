@@ -4,7 +4,6 @@ import { FC } from "react";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { cn } from "@/lib/utils";
-import ProductType from "@/lib/types/product";
 import { useQuery } from "@tanstack/react-query";
 import Message from "@/components/Message";
 import { AlertCircle, Loader } from "lucide-react";
@@ -13,21 +12,7 @@ type Props = {
   className?: string;
 };
 
-// async function getData(): Promise<ProductType[]> {
-//   return [
-//     {
-//       id: "728ed52f",
-//       name: "Adidas Ultra boost",
-//       category: "Sneaker",
-//       price: 110,
-//       sales: 1269,
-//     },
-//   ];
-// }
-
 const ProductsTable: FC<Props> = ({ className }) => {
-  // const data = await getData();
-
   const { isLoading, error, data } = useQuery({
     queryKey: ["fetchingProducts"],
     queryFn: () => fetch("/api/product").then((res) => res.json()),
@@ -52,13 +37,9 @@ const ProductsTable: FC<Props> = ({ className }) => {
     );
   }
 
-  if (data) {
-    console.log("[data] Products", data);
-  }
-
   return (
     <div className={cn(className)}>
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={data.data} />
     </div>
   );
 };

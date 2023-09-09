@@ -55,7 +55,7 @@ model User {
 model Product {
   id          String           @id @default(cuid())
   name        String
-  image       String
+  image       String           @db.Text()
   description String
   category    Category         @relation(fields: [categoryId], references: [id])
   brand       Brand?           @relation(fields: [brandId], references: [id])

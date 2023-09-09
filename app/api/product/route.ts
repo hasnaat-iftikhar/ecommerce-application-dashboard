@@ -14,6 +14,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+
     const { name, image, description, category, brand, price, tags } =
       ProductFormValidator.parse(body);
 
@@ -33,9 +34,14 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("Res after creating product: ", res);
-
-    return new Response("Product created successfully!");
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Product created successfully!",
+    });
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Error while sending req: ", err);
     if (err instanceof z.ZodError)

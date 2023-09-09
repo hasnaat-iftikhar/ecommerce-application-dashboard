@@ -1,8 +1,9 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { Loader, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { ColumnDef, Row } from "@tanstack/react-table";
 
 // Type
 import ProductType from "@/lib/types/product";
@@ -20,10 +21,65 @@ import {
 // Routes
 import ROUTES from "@/constants/routes";
 
+export const AttachedCategoryCell: React.FC<{ row: Row<ProductType> }> = ({
+  row,
+}) => {
+  const { isLoading, error, data } = useQuery(
+    ["fetchingCategoryById", row.original.categoryId],
+    {
+      queryFn: async (context) => {
+        const [, categoryId] = context.queryKey;
+        try {
+          const response = await fetch(`/api/category?id=${categoryId}`);
+          const categoryData = await response.json();
+          return categoryData;
+        } catch (error) {
+          throw new Error(`Error fetching category: ${error}`);
+        }
+      },
+    }
+  );
+
+  if (isLoading) return <Loader width="16px" height="16px" />;
+
+  if (error) return <p className="text-red font-bold">Error!</p>;
+
+  if (data.data.name) return <p>{data.data.name}</p>;
+};
+
+export const AttachedBrandCell: React.FC<{ row: Row<ProductType> }> = ({
+  row,
+}) => {
+  const { isLoading, error, data } = useQuery(
+    ["fetchingBrandById", row.original.brandId],
+    {
+      queryFn: async (context) => {
+        const [, brandId] = context.queryKey;
+        try {
+          const response = await fetch(`/api/brand?id=${brandId}`);
+          const brandData = await response.json();
+          return brandData;
+        } catch (error) {
+          throw new Error(`Error fetching brand: ${error}`);
+        }
+      },
+    }
+  );
+
+  if (isLoading) return <Loader width="16px" height="16px" />;
+
+  if (error) return <p className="text-red font-bold">Error!</p>;
+
+  if (data.data.name) return <p>{data.data.name}</p>;
+};
+
 export const columns: ColumnDef<ProductType>[] = [
   {
     accessorKey: "id",
     header: "Product ID",
+    cell: ({ row }) => {
+      return `#${row?.index + 1}`;
+    },
   },
   {
     accessorKey: "name",
@@ -32,19 +88,24 @@ export const columns: ColumnDef<ProductType>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    cell: ({ row }) => {
+      return <AttachedCategoryCell row={row} />;
+    },
+  },
+  {
+    accessorKey: "brands",
+    header: "Brand",
+    cell: ({ row }) => {
+      return <AttachedBrandCell row={row} />;
+    },
   },
   {
     accessorKey: "price",
     header: "Price",
   },
   {
-    accessorKey: "sales",
-    header: "Sales",
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
-      console.log(JSON.stringify(row, null, 2));
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
