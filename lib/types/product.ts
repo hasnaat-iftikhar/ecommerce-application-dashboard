@@ -1,9 +1,11 @@
 type ProductType = {
   id: string;
   name: string;
-  category: string;
+  image: string;
+  description: string;
+  categoryId: string;
+  brandId: string;
   price: number;
-  sales: number;
 };
 
 export default ProductType;
