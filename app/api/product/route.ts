@@ -101,3 +101,69 @@ export async function GET(req: Request) {
     }
   }
 }
+
+export async function DELETE(req: Request) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return createErrorResponse(
+      "You are Unauthorized. Please login to your account",
+      401
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const id = await searchParams.get("id");
+
+  if (!id) {
+    return createErrorResponse(
+      "Please provide a valid ID in order to delete a product",
+      400
+    );
+  }
+
+  try {
+    const productByID = await prisma.product.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        tags: true,
+      },
+    });
+
+    if (!productByID) {
+      return createErrorResponse(
+        "There is an issue while product deletion.",
+        404
+      );
+    }
+
+    await prisma.tagsOnProducts.deleteMany({
+      where: {
+        productId: id,
+      },
+    });
+
+    await prisma.product.delete({
+      where: {
+        id,
+      },
+    });
+
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Product deleted successfully!",
+    });
+
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.log("[server] Error 404", err);
+    return createErrorResponse(
+      "An error occurred while attempting to delete the product",
+      500
+    );
+  }
+}

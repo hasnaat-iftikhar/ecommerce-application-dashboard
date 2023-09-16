@@ -2,8 +2,10 @@
 
 import { Loader, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef, Row } from "@tanstack/react-table";
+import { toast } from "@/hooks/use-toast";
+import axios from "axios";
 
 // Type
 import ProductType from "@/lib/types/product";
@@ -20,6 +22,7 @@ import {
 
 // Routes
 import ROUTES from "@/constants/routes";
+import { useState } from "react";
 
 export const AttachedCategoryCell: React.FC<{ row: Row<ProductType> }> = ({
   row,
@@ -73,6 +76,72 @@ export const AttachedBrandCell: React.FC<{ row: Row<ProductType> }> = ({
   if (data.data.name) return <p>{data.data.name}</p>;
 };
 
+export const ProductActionsCell: React.FC<{ row: Row<ProductType> }> = ({
+  row,
+}) => {
+  const queryClient = useQueryClient();
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteMutation = useMutation(
+    async (id: string) => {
+      setIsDeleting(true);
+      const res = await axios.delete(`/api/product?id=${id}`);
+      setIsDeleting(false);
+      return res;
+    },
+    {
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(["fetchingProducts"]);
+
+        toast({
+          variant: "default",
+          title: "Success!",
+          description: data.data.message,
+        });
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "Error!",
+          description: "Unable to delete the product",
+        });
+      },
+    }
+  );
+
+  const handleDeleteProduct = () => {
+    deleteMutation.mutate(row.original.id);
+  };
+
+  if (isDeleting)
+    return (
+      <div className="w-[32px] h-[32px] flex justify-center items-center">
+        <Loader width="16px" height="16px" />
+      </div>
+    );
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <Link href={ROUTES.EDIT_PRODUCT(row.original.id)}>
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+        </Link>
+        <DropdownMenuItem onClick={handleDeleteProduct}>
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export const columns: ColumnDef<ProductType>[] = [
   {
     accessorKey: "id",
@@ -106,23 +175,7 @@ export const columns: ColumnDef<ProductType>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <Link href={ROUTES.EDIT_PRODUCT(row.original.id)}>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-            </Link>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ProductActionsCell row={row} />;
     },
   },
 ];
