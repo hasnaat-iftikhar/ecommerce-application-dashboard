@@ -46,6 +46,39 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
 
+  const [name, setName] = useState<string>("");
+  const [image, setImage] = useState<string>("");
+  const [imageUploading, setImageUploading] = useState<boolean>(false);
+  const [description, setDescription] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [brand, setBrand] = useState<string>("");
+  const [price, setPrice] = useState<number>(0);
+  const [tags, setTags] = useState<TagType[]>([]);
+  const [tagIDs, setTagIDs] = useState<string[]>([]);
+
+  const {
+    isLoading: isProductLoading,
+    error: errorWhileFetchingProduct,
+    data: productInfo,
+    refetch,
+  } = useQuery({
+    queryKey: ["fetchingProductByID", slug],
+    queryFn: () => fetch(`/api/product?id=${slug}`).then((res) => res.json()),
+    enabled: isEditMode,
+  });
+
+  if (isProductLoading) {
+    console.log("We are fetching product right now!");
+  }
+
+  if (errorWhileFetchingProduct) {
+    console.log("We are facing error while fetching product");
+  }
+
+  if (productInfo) {
+    console.log("Product Info", productInfo);
+  }
+
   const {
     isLoading: areCategoriesLoading,
     error: categoriesError,
@@ -72,16 +105,6 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
     queryKey: ["fetchingTags"],
     queryFn: () => fetch("/api/tag").then((res) => res.json()),
   });
-
-  const [name, setName] = useState<string>("");
-  const [image, setImage] = useState<string>("");
-  const [imageUploading, setImageUploading] = useState<boolean>(false);
-  const [description, setDescription] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
-  const [brand, setBrand] = useState<string>("");
-  const [price, setPrice] = useState<number>(0);
-  const [tags, setTags] = useState<TagType[]>([]);
-  const [tagIDs, setTagIDs] = useState<string[]>([]);
 
   const handleTag = (selectedTag: TagType) => {
     if (tags.some((t) => t.id === selectedTag.id)) {
