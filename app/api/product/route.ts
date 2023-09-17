@@ -66,11 +66,37 @@ export async function GET(req: Request) {
   const id = await searchParams.get("id");
 
   if (id) {
-    const product = await prisma.product.findFirst({
+    let productRes = await prisma.product.findFirst({
       where: {
         id,
       },
+      include: {
+        tags: true,
+      },
     });
+    const tagIDs = productRes?.tags.map((tag) => tag.tagId) || [];
+
+    const tags = await prisma.tag.findMany({
+      where: {
+        id: {
+          in: tagIDs,
+        },
+      },
+    });
+
+    const product = {
+      id: productRes?.id,
+      name: productRes?.name,
+      image: productRes?.image,
+      description: productRes?.description,
+      price: productRes?.price,
+      categoryId: productRes?.categoryId,
+      brandId: productRes?.brandId,
+      createdAt: productRes?.createdAt,
+      updatedAt: productRes?.updatedAt,
+      tagIDs,
+      tags,
+    };
 
     const successResponse = JSON.stringify({
       success: true,
@@ -99,6 +125,82 @@ export async function GET(req: Request) {
       console.log("Unable to fetch products", err);
       return createErrorResponse("Unable to fetch products", 422);
     }
+  }
+}
+
+export async function PUT(req: Request) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return createErrorResponse(
+      "You are Unauthorized. Please login to your account",
+      401
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const id = await searchParams.get("id");
+
+  if (!id) {
+    return createErrorResponse(
+      "Please provide a valid ID in order to update a product",
+      400
+    );
+  }
+
+  const body = await req.json();
+
+  try {
+    const { name, image, description, category, brand, price, tags } =
+      ProductFormValidator.parse(body);
+
+    const existingProduct = await prisma.product.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingProduct) {
+      return createErrorResponse("Product not found", 404);
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        image: image || "",
+        description,
+        price,
+        category: { connect: { id: category } },
+        brand: { connect: { id: brand } },
+        tags: {
+          create: tags.map((tag) => ({
+            tag: { connect: { id: tag } },
+          })),
+        },
+      },
+    });
+
+    console.log("updatedProduct", updatedProduct);
+
+    const successResponse = JSON.stringify({
+      success: true,
+      message: "Product updated successfully!",
+      data: updatedProduct,
+    });
+
+    return new Response(successResponse, {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) return createErrorResponse(err.message, 400);
+    console.log("[server] Error while updating product", err);
+    return createErrorResponse(
+      "An error occurred while updating the product",
+      500
+    );
   }
 }
 

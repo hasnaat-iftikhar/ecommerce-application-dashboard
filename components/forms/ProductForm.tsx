@@ -1,8 +1,8 @@
 "use client";
 
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 // Components
@@ -27,6 +27,8 @@ import MultiSelector from "../MultiSelector";
 import Image from "next/image";
 import { toast } from "@/hooks/use-toast";
 import { UploadButton } from "@/lib/uploadthing";
+import Message from "../Message";
+import { AlertCircle, Loader } from "lucide-react";
 
 type Props = {
   children: ReactNode;
@@ -42,6 +44,8 @@ const FormGroup: FC<Props> = ({ className = "", children }) => {
 };
 
 const ProductForm: FC<{ className?: string }> = ({ className }) => {
+  const queryClient = useQueryClient();
+
   const router = useRouter();
   const { slug } = useParams();
   const isEditMode = slug !== "create" ? true : false;
@@ -55,29 +59,6 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
   const [price, setPrice] = useState<number>(0);
   const [tags, setTags] = useState<TagType[]>([]);
   const [tagIDs, setTagIDs] = useState<string[]>([]);
-
-  const {
-    isLoading: isProductLoading,
-    error: errorWhileFetchingProduct,
-    data: productInfo,
-    refetch,
-  } = useQuery({
-    queryKey: ["fetchingProductByID", slug],
-    queryFn: () => fetch(`/api/product?id=${slug}`).then((res) => res.json()),
-    enabled: isEditMode,
-  });
-
-  if (isProductLoading) {
-    console.log("We are fetching product right now!");
-  }
-
-  if (errorWhileFetchingProduct) {
-    console.log("We are facing error while fetching product");
-  }
-
-  if (productInfo) {
-    console.log("Product Info", productInfo);
-  }
 
   const {
     isLoading: areCategoriesLoading,
@@ -106,6 +87,29 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
     queryFn: () => fetch("/api/tag").then((res) => res.json()),
   });
 
+  const {
+    isLoading: isProductLoading,
+    error: errorWhileFetchingProduct,
+    data: productInfo,
+  } = useQuery({
+    queryKey: ["fetchingProductByID", slug],
+    queryFn: () => fetch(`/api/product?id=${slug}`).then((res) => res.json()),
+    enabled: isEditMode,
+  });
+
+  useEffect(() => {
+    if (productInfo) {
+      setName(productInfo.data.name);
+      setImage(productInfo.data.image);
+      setDescription(productInfo.data.description);
+      setCategory(productInfo.data.categoryId);
+      setBrand(productInfo.data.brandId);
+      setPrice(productInfo.data.price);
+      setTagIDs(productInfo.data.tagIDs);
+      setTags(productInfo.data.tags);
+    }
+  }, [productInfo, allCategories]);
+
   const handleTag = (selectedTag: TagType) => {
     if (tags.some((t) => t.id === selectedTag.id)) {
       return;
@@ -123,67 +127,149 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
     setTagIDs(filteredTagIDs);
   };
 
-  const { mutate: createProduct, isLoading } = useMutation({
-    mutationFn: async () => {
-      const payload: any = {
-        name,
-        image: image as string | null,
-        description,
-        category,
-        brand,
-        price,
-        tags: tagIDs,
-      };
+  const { mutate: createProduct, isLoading: isCreateProductLoading } =
+    useMutation({
+      mutationFn: async () => {
+        const payload: any = {
+          name,
+          image: image as string | null,
+          description,
+          category,
+          brand,
+          price,
+          tags: tagIDs,
+        };
 
-      try {
-        const { data } = await axios.post(
-          "/api/product",
-          JSON.stringify(payload)
-        );
+        try {
+          const { data } = await axios.post(
+            "/api/product",
+            JSON.stringify(payload)
+          );
 
-        if (data?.success === true) {
-          setName("");
-          setImage("");
-          setImageUploading(false);
-          setDescription("");
-          setCategory("");
-          setBrand("");
-          setPrice(0);
-          setTags([]);
-          setTagIDs([]);
+          if (data?.success === true) {
+            setName("");
+            setImage("");
+            setImageUploading(false);
+            setDescription("");
+            setCategory("");
+            setBrand("");
+            setPrice(0);
+            setTags([]);
+            setTagIDs([]);
 
-          toast({
-            variant: "default",
-            title: "Success!",
-            description: data?.message,
-          });
+            toast({
+              variant: "default",
+              title: "Success!",
+              description: data?.message,
+            });
+          }
+
+          router.back();
+        } catch (error) {
+          if (
+            axios.isAxiosError(error) &&
+            error?.response?.data?.error === true
+          ) {
+            toast({
+              variant: "destructive",
+              title: "Error!",
+              description: error?.response?.data?.message,
+            });
+          } else {
+            console.log("Error while sending Axios request", error);
+          }
         }
+      },
+    });
 
-        router.back();
-      } catch (error) {
-        if (
-          axios.isAxiosError(error) &&
-          error?.response?.data?.error === true
-        ) {
-          toast({
-            variant: "destructive",
-            title: "Error!",
-            description: error?.response?.data?.message,
-          });
-        } else {
-          console.log("Error while sending Axios request", error);
+  const { mutate: updateProduct, isLoading: isEditProductLoading } =
+    useMutation({
+      mutationFn: async () => {
+        const payload: any = {
+          name,
+          image: image as string,
+          description,
+          category,
+          brand,
+          price,
+          tags: tagIDs,
+        };
+
+        console.log("payload", payload);
+
+        try {
+          const { data } = await axios.put(
+            `/api/product?id=${slug}`,
+            JSON.stringify(payload)
+          );
+
+          if (data?.success === true) {
+            setName("");
+            setImage("");
+            setImageUploading(false);
+            setDescription("");
+            setCategory("");
+            setBrand("");
+            setPrice(0);
+            setTags([]);
+            setTagIDs([]);
+
+            toast({
+              variant: "default",
+              title: "Success!",
+              description: data?.message,
+            });
+
+            await queryClient.refetchQueries(["fetchingProducts"]);
+
+            router.back();
+          }
+        } catch (error) {
+          if (
+            axios.isAxiosError(error) &&
+            error?.response?.data?.error === true
+          ) {
+            toast({
+              variant: "destructive",
+              title: "Error!",
+              description: error?.response?.data?.message,
+            });
+          } else {
+            console.log("Error while sending Axios request", error);
+          }
         }
-      }
-    },
-  });
+      },
+    });
 
   const handleSubmit = () => {
     if (isEditMode) {
-      console.log("Edit mode submission");
+      updateProduct();
     } else {
       createProduct();
     }
   };
+
+  if (isProductLoading && isEditMode) {
+    return (
+      <Message
+        className={className}
+        Icon={<Loader />}
+        title="Please wait"
+        description="We are fetching product right now!"
+      />
+    );
+  }
+
+  if (errorWhileFetchingProduct && isEditMode) {
+    return (
+      <Message
+        className={className}
+        Icon={<AlertCircle />}
+        title="Error :P"
+        description="We are facing error while fetching product"
+      />
+    );
+  }
 
   return (
     <div className={cn(className, "w-full flex flex-col gap-4")}>
@@ -239,7 +325,12 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
       </FormGroup>
       <FormGroup>
         <Label>Category</Label>
-        <Select onValueChange={(e) => setCategory(e)}>
+        <Select
+          onValueChange={(e) => {
+            setCategory(e);
+          }}
+          value={category}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
@@ -262,7 +353,7 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
       </FormGroup>
       <FormGroup>
         <Label>Brand</Label>
-        <Select onValueChange={(e) => setBrand(e)}>
+        <Select onValueChange={(e) => setBrand(e)} value={brand}>
           <SelectTrigger>
             <SelectValue placeholder="Select brand" />
           </SelectTrigger>
@@ -320,8 +411,14 @@ const ProductForm: FC<{ className?: string }> = ({ className }) => {
           </div>
         </Select>
       </FormGroup>
-      <Button disabled={isLoading} onClick={handleSubmit} className="w-fit">
-        {isLoading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+      <Button
+        disabled={isCreateProductLoading || isEditProductLoading}
+        onClick={handleSubmit}
+        className="w-fit"
+      >
+        {(isCreateProductLoading || isEditProductLoading) && (
+          <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+        )}
         {isEditMode ? "Update the product" : "Add new product"}
       </Button>
     </div>
